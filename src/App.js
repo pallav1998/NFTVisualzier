@@ -4,13 +4,15 @@ import { useNFTBalances } from "react-moralis";
 import NavBar from "./Components/NavBar";
 import NFTCard from "./Components/NFTCard";
 
+import CircularProgress from "@mui/material/CircularProgress";
+import AuthenticationSVG from "./login.svg";
+
 function App() {
   const [Address, setAddress] = useState("");
   const [NFTdata, setNFTData] = useState();
   const { authenticate, isAuthenticated, logout } = useMoralis();
 
-  const { getNFTBalances, data, error, isLoading, isFetching } =
-    useNFTBalances();
+  const { data, error, isLoading } = useNFTBalances();
 
   const login = async () => {
     if (!isAuthenticated) {
@@ -38,20 +40,44 @@ function App() {
   }, [Address, data]);
 
   return (
-    <div>
+    <div className="text-center">
       <NavBar
         address={Address}
         ConnectWallet={login}
         DisconnectWallet={logOut}
       />
-      <h1>Moralis Hello World!</h1>
-      <div>
-        <button onClick={() => getNFTBalances({ params: { chain: "0x1" } })}>
-          Refetch NFTBalances
-        </button>
-        {error ? <>{JSON.stringify(error)}</> : <NFTCard NFTdata={NFTdata} />}
-        {/* <pre>{NFTdata}</pre> */}
-      </div>
+
+      {!Address ? (
+        <>
+          <h1>Welcome to the NFT MarketPlace</h1>
+          <h3>
+            To show your minted NFT's you Need to Authenticate First to access
+            the App
+          </h3>
+          <img
+            style={{ maxHeight: "65vh", marginTop: "2rem" }}
+            src={AuthenticationSVG}
+            alt="SVG"
+          />
+        </>
+      ) : (
+        <>
+          {isLoading ? (
+            <div style={{ marginTop: "18%" }}>
+              <CircularProgress color="success" />
+              <strong>Loading....</strong>
+            </div>
+          ) : (
+            <div>
+              {error ? (
+                <>{JSON.stringify(error)}</>
+              ) : (
+                <NFTCard NFTdata={NFTdata} isLoading={isLoading} />
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
